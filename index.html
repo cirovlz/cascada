@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cascada F.C. — Inicio</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="container nav-row">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.png" alt="Logo de Cascada F.C.">
+      <span class="brand-text">CASCADA F.C.<small>CALIDAD DE SOFTWARE</small></span>
+    </a>
+    <nav class="primary-nav" id="primaryNav" aria-label="Navegación principal">
+      <ul>
+        <li><a href="index.html" aria-current="page">Inicio</a></li>
+        <li><a href="fundamentos.html">Fundamentos</a></li>
+        <li><a href="estandares.html">Estándares ISO</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+      </ul>
+    </nav>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="primaryNav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="page-top">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow-tag">Un recorrido completo por la calidad de software</span>
+        <h1>Cada etapa del desarrollo, <em>medida con el mismo rigor</em> que se construye.</h1>
+        <p class="lead">Cascada F.C. reúne en un solo sitio los fundamentos de calidad de software, las técnicas de aseguramiento, el ciclo de vida (SDLC), los modelos tradicionales y las metodologías ágiles, con los estándares ISO 9126 e ISO/IEC 25000 como hilo conductor.</p>
+      </div>
+      <div class="cascade">
+        <ol class="cascade-steps" aria-label="Fases del modelo en cascada">
+          <li class="cascade-step" style="--i:0"><span class="num">1</span><span><strong>Requisitos</strong><small>Qué debe hacer el sistema</small></span></li>
+          <li class="cascade-step" style="--i:1"><span class="num">2</span><span><strong>Diseño</strong><small>Cómo se va a construir</small></span></li>
+          <li class="cascade-step" style="--i:2"><span class="num">3</span><span><strong>Implementación</strong><small>Se escribe el código</small></span></li>
+          <li class="cascade-step" style="--i:3"><span class="num">4</span><span><strong>Pruebas</strong><small>Se verifica la calidad</small></span></li>
+          <li class="cascade-step" style="--i:4"><span class="num">5</span><span><strong>Mantenimiento</strong><small>Se corrige y evoluciona</small></span></li>
+        </ol>
+        <p class="cascade-note">Cada fase termina antes de que empiece la siguiente.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sections-block">
+    <div class="container">
+      <h2 class="sections-title">Explorá las secciones</h2>
+      <div class="section-cards">
+        <a class="section-card" href="estandares.html">
+          <h3>Gestión de la calidad del software</h3>
+          <p>Fundamentos, técnicas de aseguramiento, herramientas y estándares ISO 9126 e ISO/IEC 25000.</p>
+          <span class="card-link">Ver sección</span>
+        </a>
+        <a class="section-card" href="fundamentos.html">
+          <h3>Procesos de desarrollo de software</h3>
+          <p>Modelos tradicionales (cascada, V, iterativo) y metodologías ágiles (Scrum, Kanban, XP).</p>
+          <span class="card-link">Ver sección</span>
+        </a>
+        <a class="section-card" href="fundamentos.html#sdlc">
+          <h3>Ciclo de vida del desarrollo (SDLC)</h3>
+          <p>Las etapas por las que pasa un software, desde la idea hasta su retiro.</p>
+          <span class="card-link">Ver sección</span>
+        </a>
+        <a class="section-card" href="estandares.html">
+          <h3>Recursos y aprendizaje</h3>
+          <p>Glosario, preguntas frecuentes, enlaces útiles y ejercicios para practicar.</p>
+          <span class="card-link">Ver sección</span>
+        </a>
+        <a class="section-card" href="contacto.html">
+          <h3>Sobre nosotros</h3>
+          <p>Quiénes hacemos el sitio, por qué existe y cómo contactarnos.</p>
+          <span class="card-link">Ver sección</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%;">
+    <span>© 2026 Cascada F.C. — Proyecto académico de calidad de software.</span>
+    <span>Modelo en cascada &amp; estándares de calidad de software</span>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+
+</body>
+</html>
