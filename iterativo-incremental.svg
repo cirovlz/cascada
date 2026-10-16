@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 390" role="img" aria-labelledby="t d" font-family="Inter,'Segoe UI',system-ui,Arial,sans-serif">
+<title id="t">Modelo iterativo e incremental</title>
+<desc id="d">Tres iteraciones. Cada una repite requisitos, diseño, código y pruebas, y entrega un incremento: primero el núcleo funcional, luego nuevas funciones y por último el producto completo.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8f9cf7"/></marker></defs>
+<rect width="720" height="390" rx="14" fill="#0c1424"/>
+<g fill="none" stroke="#3a5190" stroke-width="1.5" marker-end="url(#a)"><path d="M220 120V140"/><path d="M220 240V260"/></g>
+<g fill="#101b30" stroke="#1c2b45"><rect x="20" y="20" width="680" height="100" rx="10"/><rect x="20" y="140" width="680" height="100" rx="10"/><rect x="20" y="260" width="680" height="100" rx="10" stroke="#8f9cf7"/></g>
+<g fill="#e8f3ff" font-size="14" font-weight="700"><text x="40" y="48">Iteración 1</text><text x="40" y="168">Iteración 2</text><text x="40" y="288">Iteración 3</text></g>
+<g fill="#0c1424" stroke="#2a3d63">
+<rect x="40" y="62" width="90" height="26" rx="13"/><rect x="138" y="62" width="90" height="26" rx="13"/><rect x="236" y="62" width="90" height="26" rx="13"/><rect x="334" y="62" width="90" height="26" rx="13"/>
+<rect x="40" y="182" width="90" height="26" rx="13"/><rect x="138" y="182" width="90" height="26" rx="13"/><rect x="236" y="182" width="90" height="26" rx="13"/><rect x="334" y="182" width="90" height="26" rx="13"/>
+<rect x="40" y="302" width="90" height="26" rx="13"/><rect x="138" y="302" width="90" height="26" rx="13"/><rect x="236" y="302" width="90" height="26" rx="13"/><rect x="334" y="302" width="90" height="26" rx="13"/></g>
+<g fill="#9fb0cc" font-size="11" text-anchor="middle">
+<text x="85" y="79">Requisitos</text><text x="183" y="79">Diseño</text><text x="281" y="79">Código</text><text x="379" y="79">Pruebas</text>
+<text x="85" y="199">Requisitos</text><text x="183" y="199">Diseño</text><text x="281" y="199">Código</text><text x="379" y="199">Pruebas</text>
+<text x="85" y="319">Requisitos</text><text x="183" y="319">Diseño</text><text x="281" y="319">Código</text><text x="379" y="319">Pruebas</text></g>
+<g fill="#9fb0cc" font-size="10.5"><text x="460" y="44">Producto entregado</text><text x="460" y="164">Producto entregado</text><text x="460" y="284">Producto entregado</text>
+<text x="460" y="100">Núcleo funcional</text><text x="460" y="220">Núcleo + nuevas funciones</text><text x="460" y="340">Producto completo</text></g>
+<g fill="#16243f"><rect x="460" y="56" width="220" height="10" rx="5"/><rect x="460" y="176" width="220" height="10" rx="5"/><rect x="460" y="296" width="220" height="10" rx="5"/></g>
+<g fill="#3b73f6"><rect x="460" y="56" width="66" height="10" rx="5"/><rect x="460" y="176" width="154" height="10" rx="5"/><rect x="460" y="296" width="220" height="10" rx="5"/></g>
+</svg>
