@@ -638,3 +638,34 @@ document.querySelectorAll('.quiz').forEach(quiz => {
     select(0);
   }
 })();
+
+/*  Persistencia de datos: guarda el borrador del formulario en localStorage */
+(function(){
+  const form = document.getElementById('contactForm');
+  if(!form) return;
+  const KEY = 'cascadafc:borrador-contacto';
+  const ids = ['campoNombre', 'campoTipo', 'campoSeccion', 'campoMensaje', 'campoCorreo'];
+
+  // LEER: al cargar la página, recupera lo que se había escrito
+  try{
+    const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+    ids.forEach(id => { if(saved[id]) document.getElementById(id).value = saved[id]; });
+  } catch(e){}
+
+  // GUARDAR: cada vez que se escribe o se elige algo
+  function guardar(){
+    const data = {};
+    ids.forEach(id => { data[id] = document.getElementById(id).value; });
+    try{ localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){}
+  }
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', guardar);
+    el.addEventListener('change', guardar);
+  });
+
+  // BORRAR: cuando el formulario se envía bien, el script hace form.reset() y esto limpia el borrador
+  form.addEventListener('reset', () => {
+    try{ localStorage.removeItem(KEY); } catch(e){}
+  });
+})();
