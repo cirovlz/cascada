@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encuesta de Preferencias Metodológicas — Cascada F.C.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="container nav-row">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.png" alt="Logo de Cascada F.C.">
+      <span class="brand-text">CASCADA F.C.<small>CALIDAD DE SOFTWARE</small></span>
+    </a>
+    <nav class="primary-nav" aria-label="Navegación principal"><ul><li><a href="index.html#inicio">Inicio</a></li><li><a href="index.html#gestion">Gestión de procesos</a></li><li><a href="index.html#procesos">Procesos &amp; SDLC</a></li><li><a href="index.html#agiles">Metodologías ágiles</a></li><li><a href="index.html#recursos">Recursos y aprendizaje</a></li><li><a href="index.html#nosotros">Sobre nosotros</a></li><li class="nav-tool sep"><a href="comparador.html">Comparador</a></li><li class="nav-tool"><a href="encuesta.html" class="is-active" aria-current="page">Encuesta</a></li></ul></nav>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="container narrow">
+    <p class="breadcrumb"><a href="index.html">Inicio</a> / Encuesta de Preferencias Metodológicas</p>
+    <h1 class="tool-title">Encuesta de Preferencias Metodológicas</h1>
+    <p class="sub">Respondé sobre las características de tu proyecto y te sugerimos qué enfoque encaja mejor. Podés volver atrás y cambiar respuestas.</p>
+
+    <div id="survey">
+      <div class="survey-head"><span id="sPregunta">Pregunta 1 de 9</span><span id="sPct">0% completado</span></div>
+      <div class="progress" role="progressbar" aria-label="Progreso de la encuesta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="sProgress"><i id="sBar"></i></div>
+      <ol class="stepper" id="sStepper" aria-label="Pasos de la encuesta"></ol>
+      <div class="panel q-card" id="sCard"></div>
+    </div>
+  </div>
+</main>
+
+<footer><div class="container">Cascada F.C. · Calidad de software</div></footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

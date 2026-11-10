@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparador de Metodologías — Cascada F.C.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="container nav-row">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.png" alt="Logo de Cascada F.C.">
+      <span class="brand-text">CASCADA F.C.<small>CALIDAD DE SOFTWARE</small></span>
+    </a>
+    <nav class="primary-nav" aria-label="Navegación principal"><ul><li><a href="index.html#inicio">Inicio</a></li><li><a href="index.html#gestion">Gestión de procesos</a></li><li><a href="index.html#procesos">Procesos &amp; SDLC</a></li><li><a href="index.html#agiles">Metodologías ágiles</a></li><li><a href="index.html#recursos">Recursos y aprendizaje</a></li><li><a href="index.html#nosotros">Sobre nosotros</a></li><li class="nav-tool sep"><a href="comparador.html" class="is-active" aria-current="page">Comparador</a></li><li class="nav-tool"><a href="encuesta.html">Encuesta</a></li></ul></nav>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="container">
+    <p class="breadcrumb"><a href="index.html">Inicio</a> / Comparador de Metodologías</p>
+    <h1 class="tool-title">Comparador de Metodologías</h1>
+    <p class="sub">Marcá dos o más metodologías para ver sus diferencias y similitudes lado a lado. Las filas con borde ámbar son las que difieren; las verdes, las que coinciden.</p>
+
+    <div id="cmpApp">
+      <section class="panel" aria-labelledby="pickTitle">
+        <h2 class="panel-title" id="pickTitle">Elegí las metodologías a comparar</h2>
+        <div class="pick-grid" id="pickGrid"></div>
+        <div class="pick-actions">
+          <button type="button" class="chip-btn" data-set="trad">Solo tradicionales</button>
+          <button type="button" class="chip-btn" data-set="agil">Solo ágiles</button>
+          <button type="button" class="chip-btn" data-set="todas">Todas</button>
+          <button type="button" class="chip-btn" data-set="limpiar">Limpiar</button>
+          <label class="only-diff"><input type="checkbox" id="onlyDiff"> Mostrar solo diferencias</label>
+          <span class="sel-count" id="selCount" role="status" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <div class="legend" aria-label="Referencias de la tabla">
+        <span class="lg same">✓ Coinciden</span><span>mismo valor en todas</span>
+        <span class="lg diff">≠ Difieren</span><span>valores distintos</span>
+        <span>Barras: nivel de 1 a 5 (el texto indica el nivel)</span>
+      </div>
+
+      <div id="cmpResult"></div>
+    </div>
+  </div>
+</main>
+
+<footer><div class="container">Cascada F.C. · Calidad de software</div></footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

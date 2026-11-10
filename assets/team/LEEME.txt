@@ -1,0 +1,12 @@
+Fotos del equipo (se muestran en "Sobre nosotros > Quiénes estamos detrás")
+
+Guardá acá una foto de cada integrante con estos nombres exactos:
+
+  lautaro.jpg   -> Lautaro Herrera
+  fabian.jpg    -> Fabián Clavijo
+  ciro.jpg      -> Ciro Velazquez
+  alejo.jpg     -> Alejo Venegas
+
+Recomendado: imagen cuadrada (por ejemplo 400 x 400 px), con la cara centrada.
+Si una foto falta, la tarjeta muestra las iniciales de esa persona.
+Si tus fotos son .png o .jpeg, cambiá la extensión en el src de index.html.

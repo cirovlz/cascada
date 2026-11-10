@@ -2,38 +2,6 @@
    Cascada F.C. — comportamiento de la página (escritorio)
    ========================================================= */
 
-/* 0) Menú hamburguesa (móvil y tablet) */
-(function(){
-  const toggle = document.getElementById('navToggle');
-  const nav = document.getElementById('primaryNav');
-  if(!toggle || !nav) return;
-  const mq = window.matchMedia('(max-width: 900px)');
-
-  function setOpen(open){
-    nav.classList.toggle('is-open', open);
-    toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
-  }
-
-  toggle.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
-
-  // se cierra al elegir una sección
-  nav.addEventListener('click', e => { if(e.target.closest('a')) setOpen(false); });
-
-  // se cierra con Escape (y devuelve el foco al botón)
-  document.addEventListener('keydown', e => {
-    if(e.key === 'Escape' && nav.classList.contains('is-open')){ setOpen(false); toggle.focus(); }
-  });
-
-  // se cierra al tocar fuera del encabezado
-  document.addEventListener('click', e => {
-    if(nav.classList.contains('is-open') && !e.target.closest('header')) setOpen(false);
-  });
-
-  // al pasar a pantalla ancha, vuelve al estado normal
-  mq.addEventListener('change', () => setOpen(false));
-})();
-
 /* 1) Menú: marca la sección que se está viendo mientras se hace scroll.
       Los enlaces del menú llevan a cada sección de la MISMA página. */
 (function(){
@@ -241,405 +209,7 @@ document.querySelectorAll('.quiz').forEach(quiz => {
   });
 })();
 
-
-/* 6) Efectos interactivos al pasar el cursor sobre los perfiles del equipo */
-(function () {
-  'use strict';
-
-  var grid = document.querySelector('#equipo .grid-4');
-  if (!grid) return;
-
-  var cards = Array.prototype.slice.call(grid.querySelectorAll('.member'));
-  var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var MAX_TILT = 6; // grados
-
-  function activate(card) {
-    card.classList.add('is-active');
-    grid.classList.add('has-active');
-  }
-
-  function deactivate(card) {
-    card.classList.remove('is-active');
-    card.style.removeProperty('--rx');
-    card.style.removeProperty('--ry');
-    if (!grid.querySelector('.member.is-active')) grid.classList.remove('has-active');
-  }
-
-  cards.forEach(function (card) {
-    card.setAttribute('tabindex', '0'); // accesible con teclado
-
-    card.addEventListener('mouseenter', function () { activate(card); });
-    card.addEventListener('mouseleave', function () { deactivate(card); });
-    card.addEventListener('focus', function () { activate(card); });
-    card.addEventListener('blur', function () { deactivate(card); });
-
-    // Luz que sigue al cursor + inclinación suave
-    card.addEventListener('mousemove', function (e) {
-      if (!canHover) return;
-      var r = card.getBoundingClientRect();
-      var x = e.clientX - r.left;
-      var y = e.clientY - r.top;
-      card.style.setProperty('--mx', x + 'px');
-      card.style.setProperty('--my', y + 'px');
-      if (reduceMotion) return;
-      var px = x / r.width - 0.5;
-      var py = y / r.height - 0.5;
-      card.style.setProperty('--ry', (px * MAX_TILT * 2).toFixed(2) + 'deg');
-      card.style.setProperty('--rx', (-py * MAX_TILT * 2).toFixed(2) + 'deg');
-    });
-  });
-})();
-
-
-/* 7) Buscador y filtro de herramientas de calidad*/
-(function () {
-  'use strict';
-
-  // Minúsculas y sin tildes, para que "analisis" encuentre "Análisis"
-  function normalizar(texto) {
-    return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  }
-
-  function init() {
-    var root = document.getElementById('herramientas');
-    if (!root) return;
-
-    var bar     = root.querySelector('.tool-filter');
-    var botones = Array.prototype.slice.call(root.querySelectorAll('.filter-chip'));
-    var tarjetas = Array.prototype.slice.call(root.querySelectorAll('.tool-card'));
-    var buscador = root.querySelector('#toolSearch');
-    var estado  = root.querySelector('#toolStatus');
-    var vacio   = root.querySelector('#toolsEmpty');
-    if (!bar || !botones.length || !tarjetas.length) return;
-
-    var categoria = 'todas';
-    var consulta  = '';
-
-    // Texto en el que se busca: nombre, tipo, descripción, etiquetas y uso
-    var indice = tarjetas.map(function (t) { return normalizar(t.textContent); });
-
-    // Contador de cada botón
-    botones.forEach(function (btn) {
-      var clave = btn.dataset.filter;
-      var total = clave === 'todas'
-        ? tarjetas.length
-        : tarjetas.filter(function (t) { return t.dataset.category === clave; }).length;
-      btn.querySelector('.filter-count').textContent = total;
-    });
-
-    function aplicar() {
-      var palabras = normalizar(consulta).split(/\s+/).filter(Boolean);
-      var visibles = 0;
-
-      tarjetas.forEach(function (tarjeta, i) {
-        var okCategoria = categoria === 'todas' || tarjeta.dataset.category === categoria;
-        var okTexto = palabras.every(function (p) { return indice[i].indexOf(p) !== -1; });
-        var mostrar = okCategoria && okTexto;
-
-        tarjeta.hidden = !mostrar;
-        tarjeta.classList.remove('is-entering');
-        if (mostrar) {
-          tarjeta.style.setProperty('--k', visibles);
-          void tarjeta.offsetWidth;               // reinicia la animación
-          tarjeta.classList.add('is-entering');
-          visibles++;
-        }
-      });
-
-      botones.forEach(function (btn) {
-        btn.setAttribute('aria-pressed', String(btn.dataset.filter === categoria));
-      });
-
-      if (estado) {
-        estado.textContent = 'Mostrando ' + visibles + ' de ' + tarjetas.length + ' herramientas';
-      }
-      if (vacio) vacio.hidden = visibles !== 0;
-    }
-
-    bar.addEventListener('click', function (e) {
-      var btn = e.target.closest('.filter-chip');
-      if (!btn) return;
-      categoria = btn.dataset.filter;
-      aplicar();
-    });
-
-    if (buscador) {
-      buscador.addEventListener('input', function () {
-        consulta = buscador.value;
-        aplicar();
-      });
-    }
-
-    aplicar();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
-
-
-
-
-
-/* 8) SDLC iluminación paso a paso de las etapas*/
-(function () {
-  'use strict';
-
-  var block = document.getElementById('sdlc');
-  var controls = document.getElementById('sdlcControls');
-  var timeline = block && block.querySelector('.timeline');
-  if (!block || !controls || !timeline) return;
-
-  var items   = Array.prototype.slice.call(timeline.querySelectorAll('.tl-item'));
-  var stepper = document.getElementById('sdlcStepper');
-  var steps   = Array.prototype.slice.call(stepper.querySelectorAll('.sdlc-step'));
-  var boxes   = Array.prototype.slice.call(block.querySelectorAll('.sdlc-side svg rect.svg-box'));
-  var status  = document.getElementById('sdlcStatus');
-  var prevBtn = document.getElementById('sdlcPrev');
-  var nextBtn = document.getElementById('sdlcNext');
-  if (!items.length || items.length !== steps.length) return;
-
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var current = -1;
-  var autoScrolling = false;   // true mientras la página se desplaza sola (clic en una etapa)
-  var idleTimer = null;
-
-  function behavior() { return reduceMotion.matches ? 'auto' : 'smooth'; }
-
-  /* La barra de progreso llega hasta el punto de la etapa activa */
-  function updateFill() {
-    if (current < 0) return;
-    var y = items[current].offsetTop - 1;
-    timeline.style.setProperty('--fill', Math.max(0, y) + 'px');
-  }
-
-  /* En pantallas angostas, mantiene visible la etapa activa dentro de la barra horizontal */
-  function keepStepVisible() {
-    if (stepper.scrollWidth <= stepper.clientWidth) return;
-    var st = steps[current];
-    var left = st.offsetLeft - (stepper.clientWidth - st.offsetWidth) / 2;
-    stepper.scrollTo({ left: left, behavior: behavior() });
-  }
-
-  function setActive(i) {
-    i = Math.max(0, Math.min(items.length - 1, i));
-    if (i === current) return;
-    current = i;
-
-    items.forEach(function (it, k) {
-      it.classList.toggle('is-active', k === i);
-      it.classList.toggle('is-done', k < i);
-    });
-    steps.forEach(function (st, k) {
-      st.classList.toggle('is-active', k === i);
-      st.classList.toggle('is-done', k < i);
-      if (k === i) { st.setAttribute('aria-current', 'step'); }
-      else { st.removeAttribute('aria-current'); }
-    });
-    boxes.forEach(function (b, k) { b.classList.toggle('is-lit', k === i); });
-
-    var name = items[i].querySelector('h3');
-    status.textContent = 'Etapa ' + (i + 1) + ' de ' + items.length + (name ? ': ' + name.textContent : '');
-    prevBtn.disabled = (i === 0);
-    nextBtn.disabled = (i === items.length - 1);
-
-    updateFill();
-    keepStepVisible();
-  }
-
-  /* Ir a una etapa con desplazamiento suave */
-  function goTo(i) {
-    i = Math.max(0, Math.min(items.length - 1, i));
-    setActive(i);
-    lockObserver();
-    items[i].scrollIntoView({ behavior: behavior(), block: 'center' });
-  }
-
-  /* Mientras dura el desplazamiento automático se ignora el scroll, para que no parpadeen etapas intermedias */
-  function lockObserver() {
-    autoScrolling = true;
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(function () { autoScrolling = false; }, 250);
-  }
-  window.addEventListener('scroll', function () {
-    if (!autoScrolling) return;
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(function () { autoScrolling = false; }, 160);
-  }, { passive: true });
-
-  /* ----- eventos ----- */
-  steps.forEach(function (st, k) {
-    st.addEventListener('click', function () { goTo(k); });
-  });
-  prevBtn.addEventListener('click', function () { goTo(current - 1); });
-  nextBtn.addEventListener('click', function () { goTo(current + 1); });
-
-  items.forEach(function (it, k) {
-    it.addEventListener('click', function () { setActive(k); });
-    it.addEventListener('focus', function () { setActive(k); });
-  });
-
-  /* Al hacer scroll se enciende la etapa que cruza el centro de la pantalla */
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
-      if (autoScrolling) return;
-      entries.forEach(function (e) {
-        if (e.isIntersecting) setActive(items.indexOf(e.target));
-      });
-    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-    items.forEach(function (it) { io.observe(it); });
-  }
-
-  /* La barra de progreso se recalcula si cambia el alto de la línea de tiempo */
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(updateFill).observe(timeline);
-  } else {
-    window.addEventListener('resize', updateFill);
-  }
-
-  /* ----- inicio ----- */
-  boxes.forEach(function (b) { b.classList.remove('hl'); });  // el resaltado fijo pasa a depender de la etapa activa
-  timeline.classList.add('is-live');
-  controls.hidden = false;
-  setActive(0);
-})();
-
-/* 9) Navegación interna entre Cascada, Modelo en V e Iterativo e incremental  */
-(function () {
-  'use strict';
-
-  var root = document.querySelector('[data-modelos]');
-  if (!root) return;
-
-  var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
-  if (!tabs.length) return;
-
-  var panels = tabs.map(function (t) {
-    return document.getElementById(t.getAttribute('aria-controls'));
-  });
-  var tablist = root.querySelector('[role="tablist"]');
-  var prev = root.querySelector('[data-modelos-prev]');
-  var next = root.querySelector('[data-modelos-next]');
-  var count = root.querySelector('[data-modelos-count]');
-  var section = document.getElementById('modelos');
-  var PREFIX = '#modelos-';
-  var current = 0;
-  var reduceMotion = window.matchMedia &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function slugOf(i) {
-    return tabs[i].id.replace(/^tab-/, '');
-  }
-
-  function indexFromHash(hash) {
-    if (!hash || hash.indexOf(PREFIX) !== 0) return -1;
-    var slug = hash.slice(PREFIX.length);
-    for (var i = 0; i < tabs.length; i++) {
-      if (slugOf(i) === slug) return i;
-    }
-    return -1;
-  }
-
-  function select(i, opts) {
-    opts = opts || {};
-    if (i < 0 || i >= tabs.length) return;
-    current = i;
-
-    tabs.forEach(function (tab, k) {
-      var on = k === i;
-      tab.setAttribute('aria-selected', on ? 'true' : 'false');
-      tab.tabIndex = on ? 0 : -1;
-      if (panels[k]) panels[k].hidden = !on;
-    });
-
-    if (count) count.textContent = (i + 1) + ' / ' + tabs.length;
-    if (prev) prev.disabled = i === 0;
-    if (next) next.disabled = i === tabs.length - 1;
-
-    if (opts.focus) tabs[i].focus();
-    if (opts.hash && window.history && history.replaceState) {
-      history.replaceState(null, '', PREFIX + slugOf(i));
-    }
-  }
-
-  function revealSection() {
-    if (!section) return;
-    section.scrollIntoView({
-      behavior: reduceMotion ? 'auto' : 'smooth',
-      block: 'start'
-    });
-  }
-
-  /* clic en una pestaña */
-  tabs.forEach(function (tab, i) {
-    tab.addEventListener('click', function () {
-      select(i, { hash: true });
-    });
-  });
-
-  /* teclado: flechas, Inicio y Fin (patrón WAI-ARIA de pestañas) */
-  if (tablist) {
-    tablist.addEventListener('keydown', function (e) {
-      var target = -1;
-      switch (e.key) {
-        case 'ArrowRight':
-        case 'ArrowDown':
-          target = (current + 1) % tabs.length;
-          break;
-        case 'ArrowLeft':
-        case 'ArrowUp':
-          target = (current - 1 + tabs.length) % tabs.length;
-          break;
-        case 'Home':
-          target = 0;
-          break;
-        case 'End':
-          target = tabs.length - 1;
-          break;
-        default:
-          return;
-      }
-      e.preventDefault();
-      select(target, { focus: true, hash: true });
-    });
-  }
-
-  /* botones anterior / siguiente */
-  if (prev) {
-    prev.addEventListener('click', function () {
-      select(current - 1, { hash: true });
-    });
-  }
-  if (next) {
-    next.addEventListener('click', function () {
-      select(current + 1, { hash: true });
-    });
-  }
-
-  /* enlaces directos (también funcionan <a href="#modelos-v"> en cualquier parte) */
-  window.addEventListener('hashchange', function () {
-    var i = indexFromHash(window.location.hash);
-    if (i >= 0) {
-      select(i);
-      revealSection();
-    }
-  });
-
-  /* estado inicial */
-  var start = indexFromHash(window.location.hash);
-  if (start >= 0) {
-    select(start);
-    window.setTimeout(revealSection, 60);
-  } else {
-    select(0);
-  }
-})();
-
-/*  Persistencia de datos: guarda el borrador del formulario en localStorage */
+/* 6) Persistencia de datos: guarda el borrador del formulario de contacto en localStorage */
 (function(){
   const form = document.getElementById('contactForm');
   if(!form) return;
@@ -668,4 +238,359 @@ document.querySelectorAll('.quiz').forEach(quiz => {
   form.addEventListener('reset', () => {
     try{ localStorage.removeItem(KEY); } catch(e){}
   });
+})();
+
+/* 7) Comparador de metodologías (comparador.html) */
+(function(){
+  const app = document.getElementById('cmpApp');
+  if(!app) return;
+
+  const LEVELS = ['', 'Muy baja', 'Baja', 'Media', 'Alta', 'Muy alta'];
+  const ROWS = [
+    ['tipo', 'Tipo', 'text'],
+    ['enfoque', 'Enfoque', 'text'],
+    ['roles', 'Roles', 'text'],
+    ['flexibilidad', 'Flexibilidad ante cambios', 'level'],
+    ['entregas', 'Entregas', 'text'],
+    ['documentacion', 'Documentación', 'level'],
+    ['participacion', 'Participación del cliente', 'level'],
+    ['riesgos', 'Gestión de riesgos', 'text'],
+    ['ideal', 'Ideal para', 'text'],
+    ['limitacion', 'Principal limitación', 'text']
+  ];
+  const DATA = [
+    { id: 'cascada', nombre: 'Cascada', tipo: 'Tradicional', v: {
+      tipo: 'Tradicional',
+      enfoque: 'Secuencial y lineal: cada fase termina antes de empezar la siguiente.',
+      roles: 'Gerente de proyecto, analista, diseñador, programador y tester, con roles especializados por fase.',
+      flexibilidad: 1,
+      entregas: 'Una única entrega al final del proyecto.',
+      documentacion: 5, participacion: 2,
+      riesgos: 'Se detectan tarde, sobre todo en las pruebas finales.',
+      ideal: 'Requisitos estables, bien definidos y poco propensos a cambiar.',
+      limitacion: 'Los cambios una vez avanzado el proyecto son muy costosos.' } },
+    { id: 'v', nombre: 'Modelo V', tipo: 'Tradicional', v: {
+      tipo: 'Tradicional',
+      enfoque: 'Variante de la cascada: cada fase de construcción tiene un nivel de prueba asociado que se planifica desde el comienzo.',
+      roles: 'Gerente de proyecto, analistas, diseñadores, programadores y testers, con un equipo de verificación en paralelo.',
+      flexibilidad: 2,
+      entregas: 'Una única entrega al final, tras completar todos los niveles de prueba.',
+      documentacion: 5, participacion: 2,
+      riesgos: 'Se detectan antes que en la cascada, porque cada fase tiene su prueba asociada.',
+      ideal: 'Sistemas críticos donde la verificación es obligatoria: software médico, automotriz o aeroespacial.',
+      limitacion: 'Es rígido ante cambios de requisitos y no produce versiones funcionales tempranas.' } },
+    { id: 'iterativo', nombre: 'Iterativo / Incremental', tipo: 'Tradicional', v: {
+      tipo: 'Tradicional',
+      enfoque: 'Se construye en ciclos: cada iteración repite requisitos, diseño, implementación y pruebas y suma un incremento funcional.',
+      roles: 'Gerente de proyecto, analistas, desarrolladores y testers; el cliente revisa cada incremento.',
+      flexibilidad: 4,
+      entregas: 'Incrementos funcionales entregados por partes, al final de cada iteración.',
+      documentacion: 3, participacion: 3,
+      riesgos: 'Se detectan temprano al probar cada incremento, aunque exige integración constante.',
+      ideal: 'Proyectos grandes con requisitos que se aclaran con el tiempo y un cliente que quiere ver avances.',
+      limitacion: 'Necesita una buena arquitectura desde el inicio y es más difícil estimar el costo y el plazo total.' } },
+    { id: 'scrum', nombre: 'Scrum', tipo: 'Ágil', v: {
+      tipo: 'Ágil',
+      enfoque: 'Marco de trabajo con sprints de 1 a 4 semanas, revisiones y retrospectivas.',
+      roles: 'Product Owner, Scrum Master y equipo de desarrollo autoorganizado.',
+      flexibilidad: 4,
+      entregas: 'Un incremento potencialmente entregable al final de cada sprint.',
+      documentacion: 2, participacion: 5,
+      riesgos: 'Se mitigan con revisiones de sprint y retrospectivas frecuentes.',
+      ideal: 'Productos con requisitos cambiantes y equipos pequeños o medianos.',
+      limitacion: 'Requiere un equipo disciplinado y un Product Owner disponible.' } },
+    { id: 'kanban', nombre: 'Kanban', tipo: 'Ágil', v: {
+      tipo: 'Ágil',
+      enfoque: 'Método visual de flujo continuo: el trabajo se muestra en un tablero y se limita el trabajo en curso (WIP).',
+      roles: 'No define roles obligatorios: el equipo conserva los que ya tiene.',
+      flexibilidad: 5,
+      entregas: 'Entrega continua: cada tarea se entrega apenas se termina, sin ciclos fijos.',
+      documentacion: 2, participacion: 3,
+      riesgos: 'Los cuellos de botella se ven en el tablero y el límite de WIP evita acumular trabajo a medio hacer.',
+      ideal: 'Soporte, mantenimiento y trabajo que llega de forma continua e impredecible.',
+      limitacion: 'Sin fechas ni ciclos fijos, es más difícil planificar a largo plazo.' } },
+    { id: 'xp', nombre: 'XP (Extreme Programming)', tipo: 'Ágil', v: {
+      tipo: 'Ágil',
+      enfoque: 'Prácticas técnicas de ingeniería en iteraciones muy cortas: programación en pareja, TDD e integración continua.',
+      roles: 'Programadores, cliente integrado al equipo, coach y tracker.',
+      flexibilidad: 5,
+      entregas: 'Versiones pequeñas y frecuentes, a menudo cada una o dos semanas.',
+      documentacion: 2, participacion: 5,
+      riesgos: 'Se reducen con pruebas automáticas, integración continua y revisión constante entre pares.',
+      ideal: 'Equipos pequeños con requisitos cambiantes y alta exigencia técnica.',
+      limitacion: 'Exige mucha disciplina técnica y un cliente muy disponible.' } }
+  ];
+
+  const KEY = 'cascadafc:comparador';
+  let selected = new Set(['cascada', 'scrum']);
+  let onlyDiff = false;
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if(s && Array.isArray(s.selected)){
+      selected = new Set(s.selected.filter(id => DATA.some(m => m.id === id)));
+      onlyDiff = !!s.onlyDiff;
+    }
+  } catch(e){}
+
+  const grid = document.getElementById('pickGrid');
+  const result = document.getElementById('cmpResult');
+  const count = document.getElementById('selCount');
+  const chkDiff = document.getElementById('onlyDiff');
+  const tagCls = m => m.tipo === 'Ágil' ? 't-agil' : 't-trad';
+
+  grid.innerHTML = DATA.map(m =>
+    `<label class="pick"><input type="checkbox" value="${m.id}"><span><strong>${m.nombre}</strong><em class="${tagCls(m)}">${m.tipo}</em></span></label>`
+  ).join('');
+
+  function cell(v, type){
+    if(type === 'level'){
+      const bars = [1, 2, 3, 4, 5].map(i => `<i class="${i <= v ? 'on' : ''}"></i>`).join('');
+      return `<div class="bars" aria-hidden="true">${bars}</div><strong>${LEVELS[v]}</strong> <span class="lv">(${v}/5)</span>`;
+    }
+    return v;
+  }
+
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify({ selected: Array.from(selected), onlyDiff })); } catch(e){}
+  }
+
+  function render(){
+    const sel = DATA.filter(m => selected.has(m.id));
+    grid.querySelectorAll('.pick').forEach(label => {
+      const input = label.querySelector('input');
+      const on = selected.has(input.value);
+      input.checked = on;
+      label.classList.toggle('is-selected', on);
+    });
+    chkDiff.checked = onlyDiff;
+    count.textContent = sel.length === 1 ? '1 seleccionada' : `${sel.length} seleccionadas`;
+
+    if(sel.length < 2){
+      result.innerHTML = '<div class="cmp-empty">Marcá al menos dos metodologías para compararlas.</div>';
+      return;
+    }
+
+    let diffCount = 0, body = '';
+    ROWS.forEach(([key, label, type]) => {
+      const vals = sel.map(m => m.v[key]);
+      const same = vals.every(x => x === vals[0]);
+      if(!same) diffCount++;
+      if(onlyDiff && same) return;
+      body += `<tr class="${same ? 'same' : 'diff'}"><th scope="row"><span>${label}</span>` +
+              `<em class="${same ? 'badge-same' : 'badge-diff'}">${same ? '✓ Coinciden' : '≠ Difieren'}</em></th>` +
+              sel.map(m => `<td>${cell(m.v[key], type)}</td>`).join('') + '</tr>';
+    });
+
+    const head = '<th scope="col">Característica</th>' +
+      sel.map(m => `<th scope="col">${m.nombre}<small class="${tagCls(m)}">${m.tipo}</small></th>`).join('');
+    const summary = `<p class="cmp-summary" role="status"><b>${diffCount} de ${ROWS.length}</b> características ` +
+      `${diffCount === 1 ? 'difiere' : 'difieren'} entre las metodologías seleccionadas.</p>`;
+
+    result.innerHTML = body
+      ? `<div class="cmp-wrap"><table class="cmp-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${summary}`
+      : `<div class="cmp-empty">Las metodologías seleccionadas coinciden en todas las características.</div>${summary}`;
+  }
+
+  grid.addEventListener('change', e => {
+    if(e.target.matches('input[type="checkbox"]')){
+      if(e.target.checked) selected.add(e.target.value); else selected.delete(e.target.value);
+      save(); render();
+    }
+  });
+  chkDiff.addEventListener('change', () => { onlyDiff = chkDiff.checked; save(); render(); });
+  app.querySelectorAll('[data-set]').forEach(btn => btn.addEventListener('click', () => {
+    const k = btn.dataset.set;
+    if(k === 'trad') selected = new Set(DATA.filter(m => m.tipo === 'Tradicional').map(m => m.id));
+    if(k === 'agil') selected = new Set(DATA.filter(m => m.tipo === 'Ágil').map(m => m.id));
+    if(k === 'todas') selected = new Set(DATA.map(m => m.id));
+    if(k === 'limpiar') selected = new Set();
+    save(); render();
+  }));
+
+  render();
+})();
+
+/* 8) Encuesta de preferencias metodológicas (encuesta.html) */
+(function(){
+  const root = document.getElementById('survey');
+  if(!root) return;
+
+  // cada opción: [título, descripción, puntaje]  (0 = tradicional · 1 = híbrido · 2 = ágil)
+  const Q = [
+    { label: 'Tamaño', title: '¿Qué tan grande es el proyecto y el equipo?', hint: 'Pensá en personas involucradas y duración estimada.',
+      opts: [['Pequeño', 'Hasta ~5 personas y pocos meses', 2], ['Mediano', 'Entre 6 y 15 personas', 1], ['Grande', 'Varios equipos o más de 15 personas', 0]] },
+    { label: 'Complejidad', title: '¿Qué tan complejo es el problema técnico y de negocio?', hint: 'Considerá integraciones, reglas de negocio y tecnología nueva.',
+      opts: [['Baja', 'Problema conocido y tecnología probada', 0], ['Media', 'Algunas integraciones o reglas complejas', 1], ['Alta', 'Mucha incertidumbre técnica o de negocio', 2]] },
+    { label: 'Requisitos', title: '¿Qué tan estables son los requisitos?', hint: '¿Esperás que cambien durante el proyecto?',
+      opts: [['Estables', 'Definidos de antemano y poco propensos a cambiar', 0], ['Algo cambiantes', 'Se irán afinando con el tiempo', 1], ['Muy cambiantes', 'Cambian seguido o recién se están descubriendo', 2]] },
+    { label: 'Cliente', title: '¿Qué tan disponible está el cliente?', hint: 'Pensá en cuánto puede participar y dar su opinión.',
+      opts: [['Poco disponible', 'Solo al inicio y al final del proyecto', 0], ['Disponible a veces', 'Reuniones periódicas de seguimiento', 1], ['Muy disponible', 'Puede integrarse al equipo y responder rápido', 2]] },
+    { label: 'Entregas', title: '¿Cuándo necesita el cliente ver resultados?', hint: 'Pensá en cada cuánto espera recibir algo utilizable.',
+      opts: [['Una sola entrega final', 'El producto completo, al terminar', 0], ['Entregas por etapas', 'Hitos grandes cada cierto tiempo', 1], ['Entregas frecuentes', 'Versiones utilizables cada pocas semanas', 2]] },
+    { label: 'Criticidad', title: '¿Qué tan crítico es un fallo en producción?', hint: 'Pensá en las consecuencias de un error una vez entregado.',
+      opts: [['Crítico', 'Una falla pone en riesgo vidas, dinero o normativas', 0], ['Importante', 'Un fallo causa problemas serios pero reparables', 1], ['Tolerable', 'Se puede corregir rápido sin grandes consecuencias', 2]] },
+    { label: 'Equipo', title: '¿Cómo trabaja y qué experiencia tiene el equipo?', hint: 'Pensá en su autonomía y en su costumbre de colaborar.',
+      opts: [['Roles definidos y jerárquico', 'Funciones especializadas por fase', 0], ['Mixto', 'Parte del equipo trabaja con autonomía', 1], ['Autoorganizado', 'Equipo multidisciplinario con experiencia colaborativa', 2]] },
+    { label: 'Documentación', title: '¿Cuánta documentación exige el proyecto?', hint: 'Contratos, normativas o auditorías pueden requerirla.',
+      opts: [['Mucha', 'Contratos, normativas o auditorías la requieren', 0], ['Moderada', 'La necesaria para mantener el sistema', 1], ['Mínima', 'Se prefiere software funcionando antes que documentos', 2]] },
+    { label: 'Tipo de equipo', title: '¿Dónde y cómo trabaja el equipo?', hint: 'Pensá en la ubicación y en cuánto se comunican a diario.',
+      opts: [['Distribuido o con terceros', 'Varias sedes, contratistas o husos horarios', 0], ['Mixto', 'Parte junto y parte a distancia', 1], ['Reunido y en contacto diario', 'Mismo lugar o comunicación diaria fluida', 2]] }
+  ];
+  const RES = {
+    tradicional: { badge: 'Tradicional', title: 'Te conviene un enfoque tradicional',
+      text: 'Tus respuestas apuntan a requisitos estables, necesidad de control y documentación o consecuencias serias ante un fallo. Un modelo secuencial te da previsibilidad de plazos, costos y trazabilidad.',
+      recs: [['Cascada', 'Si el alcance está cerrado y los requisitos no van a cambiar.'], ['Modelo en V', 'Si además la verificación es obligatoria, porque cada fase tiene su prueba asociada.']] },
+    hibrido: { badge: 'Híbrido', title: 'Te conviene un enfoque híbrido',
+      text: 'Tus respuestas mezclan señales de estabilidad y de cambio. Podés planificar y documentar lo esencial al inicio, como en un modelo tradicional, y construir por iteraciones cortas con entregas parciales.',
+      recs: [['Iterativo e incremental', 'Entregas por partes con una arquitectura definida desde el principio.'], ['Scrum con planificación inicial', 'Sprints y revisiones, apoyados en una etapa previa de requisitos y diseño general.']] },
+    agil: { badge: 'Ágil', title: 'Te conviene un enfoque ágil',
+      text: 'Tus respuestas indican requisitos cambiantes, un cliente disponible y un equipo con autonomía. Entregar valor en ciclos cortos y aprender de cada iteración te permite absorber el cambio.',
+      recs: [['Scrum', 'Si querés un ritmo de sprints con roles y revisiones periódicas.'], ['Kanban', 'Si el trabajo llega de forma continua y importa más el flujo que los ciclos.'], ['XP', 'Si la exigencia técnica es alta y querés prácticas como TDD e integración continua.']] }
+  };
+  const LEAN = ['Tradicional', 'Híbrido', 'Ágil'];
+  const KEY = 'cascadafc:encuesta';
+
+  let st = { answers: Array(Q.length).fill(null), step: 0, done: false };
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if(s && Array.isArray(s.answers) && s.answers.length === Q.length){
+      st = { answers: s.answers.map(a => (Number.isInteger(a) && a >= 0 && a < 3) ? a : null), step: Math.min(Math.max(s.step | 0, 0), Q.length - 1), done: !!s.done };
+      if(st.done && st.answers.includes(null)) st.done = false;
+    }
+  } catch(e){}
+  const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){} };
+
+  const elP = document.getElementById('sPregunta'), elPct = document.getElementById('sPct'), elBar = document.getElementById('sBar');
+  const elProg = document.getElementById('sProgress'), elStep = document.getElementById('sStepper'), card = document.getElementById('sCard');
+
+  function maxStep(){ const i = st.answers.indexOf(null); return i === -1 ? Q.length - 1 : i; }
+
+  function chrome(){
+    const answered = st.answers.filter(a => a !== null).length;
+    const pct = Math.round(answered / Q.length * 100);
+    elP.textContent = st.done ? 'Encuesta completa' : `Pregunta ${st.step + 1} de ${Q.length}`;
+    elPct.textContent = `${pct}% completado`;
+    elBar.style.width = pct + '%';
+    elProg.setAttribute('aria-valuenow', String(pct));
+    elStep.innerHTML = Q.map((q, i) => {
+      const done = st.answers[i] !== null && !(i === st.step && !st.done);
+      const cur = i === st.step && !st.done;
+      const can = i <= maxStep();
+      return `<li class="step${cur ? ' is-current' : ''}${done ? ' is-done' : ''}"><button type="button" data-go="${i}"${can ? '' : ' disabled'}${cur ? ' aria-current="step"' : ''}><span class="dot">${done ? '✓' : i + 1}</span><span>${q.label}</span></button></li>`;
+    }).join('');
+  }
+
+  function showQuestion(){
+    const q = Q[st.step];
+    const sel = st.answers[st.step];
+    card.innerHTML =
+      `<fieldset><legend>${q.title}</legend><p class="q-hint">${q.hint}</p>` +
+      q.opts.map((o, i) => `<label class="opt${sel === i ? ' is-selected' : ''}"><input type="radio" name="q${st.step}" value="${i}"${sel === i ? ' checked' : ''}><span><strong>${o[0]}</strong><span>${o[1]}</span></span></label>`).join('') +
+      '</fieldset>' +
+      `<div class="q-nav"><button type="button" class="btn btn-ghost btn-pill" id="sPrev"${st.step === 0 ? ' disabled' : ''}>← Anterior</button>` +
+      `<button type="button" class="btn btn-accent" id="sNext"${sel === null ? ' disabled' : ''}>${st.step === Q.length - 1 ? 'Ver resultado →' : 'Siguiente →'}</button></div>`;
+
+    card.querySelectorAll('input[type="radio"]').forEach(inp => inp.addEventListener('change', () => {
+      st.answers[st.step] = Number(inp.value);
+      save();
+      card.querySelectorAll('.opt').forEach(l => l.classList.toggle('is-selected', l.contains(inp) && inp.checked));
+      card.querySelector('#sNext').disabled = false;
+      chrome();
+    }));
+    card.querySelector('#sPrev').addEventListener('click', () => { if(st.step > 0){ st.step--; save(); render(); } });
+    card.querySelector('#sNext').addEventListener('click', () => {
+      if(st.answers[st.step] === null) return;
+      if(st.step < Q.length - 1){ st.step++; } else { st.done = true; }
+      save(); render();
+    });
+  }
+
+  function showResult(){
+    const score = st.answers.reduce((sum, a, i) => sum + Q[i].opts[a][2], 0);
+    const max = Q.length * 2;
+    const type = score <= 6 ? 'tradicional' : score <= 11 ? 'hibrido' : 'agil';
+    const r = RES[type];
+    const pct = Math.round(score / max * 100);
+    const recs = r.recs.map(x => `<li><strong>${x[0]}.</strong> ${x[1]}</li>`).join('');
+    const ans = Q.map((q, i) => { const o = q.opts[st.answers[i]]; return `<div class="ans"><b>${q.label}</b>${o[0]}<br><em class="l-${o[2]}">${LEAN[o[2]]}</em></div>`; }).join('');
+    const tip = (Q[5].opts[st.answers[5]][2] === 0 && type !== 'tradicional')
+      ? '<div class="note res-tip"><p><b>Ojo con la criticidad:</b> indicaste que un fallo es crítico. Aun con un enfoque ' + (type === 'agil' ? 'ágil' : 'híbrido') + ', conviene reforzar las pruebas y la documentación.</p></div>' : '';
+    card.innerHTML =
+      `<span class="res-badge ${type}">${r.badge}</span><h2 class="res-title">${r.title}</h2><p class="res-text">${r.text}</p>` +
+      `<div class="gauge"><div class="gauge-bar"><span class="gauge-mark" style="left:${Math.min(Math.max(pct, 2), 98)}%"></span></div><div class="gauge-lbl"><span>Tradicional</span><span>Híbrido</span><span>Ágil</span></div></div>` +
+      `<h3 class="res-h">Qué te sugerimos mirar</h3><ul class="rec-list">${recs}</ul>${tip}` +
+      `<h3 class="res-h">Tus respuestas</h3><div class="ans-grid">${ans}</div>` +
+      '<div class="res-actions"><button type="button" class="btn btn-accent" id="sReset">Reiniciar encuesta</button><a class="btn btn-ghost btn-pill" href="comparador.html">Ver el comparador</a><a class="btn btn-ghost btn-pill" href="index.html">Volver al inicio</a></div>';
+    card.querySelector('#sReset').addEventListener('click', () => {
+      st = { answers: Array(Q.length).fill(null), step: 0, done: false };
+      try{ localStorage.removeItem(KEY); } catch(e){}
+      render();
+    });
+  }
+
+  function render(){
+    chrome();
+    if(st.done) showResult(); else showQuestion();
+  }
+
+  elStep.addEventListener('click', e => {
+    const b = e.target.closest('button[data-go]');
+    if(!b || b.disabled) return;
+    st.step = Number(b.dataset.go); st.done = false; save(); render();
+  });
+
+  render();
+})();
+
+/* 9) Metodologías ágiles: índice flotante con salto fluido y sección activa */
+(function(){
+  const bar = document.getElementById('agilesToc');
+  if(!bar) return;
+  const links = Array.from(bar.querySelectorAll('a.toc-pill'));
+  const section = document.getElementById('agiles');
+  const targets = [...new Set(links.map(a => a.getAttribute('href')))];
+
+  function selectedScrumTab(){
+    const t = document.querySelector('#scrum-detalle [role="tab"][aria-selected="true"]');
+    return t ? t.id : null;
+  }
+
+  function update(){
+    const r = section.getBoundingClientRect();
+    let current = null, activeTarget = null;
+    if(r.top < window.innerHeight && r.bottom > 0){
+      targets.forEach(h => {
+        const el = document.querySelector(h);
+        if(el && el.getBoundingClientRect().top <= 200) activeTarget = h;
+      });
+      if(activeTarget === '#scrum-detalle'){
+        current = links.find(a => a.dataset.tab === selectedScrumTab()) || links.find(a => a.getAttribute('href') === activeTarget);
+      } else if(activeTarget){
+        current = links.find(a => a.getAttribute('href') === activeTarget);
+      }
+    }
+    links.forEach(a => {
+      const on = a === current;
+      a.classList.toggle('is-active', on);
+      if(on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+  }
+
+  // Roles / Ceremonias / Artefactos: abre la pestaña correcta de Scrum y baja hasta ella
+  links.forEach(a => a.addEventListener('click', () => {
+    if(a.dataset.tab){
+      const tab = document.getElementById(a.dataset.tab);
+      if(tab) tab.click();
+    }
+  }));
+  document.querySelectorAll('#scrum-detalle [role="tab"]').forEach(t => t.addEventListener('click', () => setTimeout(update, 0)));
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { update(); ticking = false; });
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
 })();
